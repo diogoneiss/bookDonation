@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 class Task {
   int id;
   String title;
@@ -11,6 +13,10 @@ class Task {
 
   int status; // 0 = Incomplete, 1 - Complete
 
+  Task imgFromJson(String str) => Task.fromMap(json.decode(str));
+
+  String imgToJson(Task data) => json.encode(data.toMap());
+
   Task(
       {this.id,
       this.title,
@@ -21,22 +27,23 @@ class Task {
       this.userDonated,
       this.emailDonated});
 
-  Task.withId(
-      {this.id,
-      this.title,
-      this.date,
-      this.priority,
-      this.status,
-      this.imageEncoded,
-      this.author,
-      this.userDonated,
-      this.emailDonated});
+  Task.withId({this.id,
+    this.title,
+    this.date,
+    this.priority,
+    this.status,
+    this.imageEncoded,
+    this.author,
+    this.userDonated,
+    this.emailDonated});
 
   Map<String, dynamic> toMap() {
     final map = Map<String, dynamic>();
     if (id != null) {
       map['id'] = id;
     }
+    if (date == null)
+      date = DateTime.now();
     map['title'] = title;
     map['date'] = date.toIso8601String();
     map['priority'] = priority;
@@ -50,6 +57,9 @@ class Task {
   }
 
   factory Task.fromMap(Map<String, dynamic> map) {
+    if (map['date'] == null)
+      map['date'] = DateTime.now().toIso8601String();
+
     return Task.withId(
         id: map['id'],
         title: map['title'],

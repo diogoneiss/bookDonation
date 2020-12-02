@@ -63,133 +63,6 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
   }
 
   @override
-  void dispose() {
-    _dateController.dispose();
-    super.dispose();
-  }
-
-  static Image imageFromBase64String(String base64String) {
-    return Image.memory(
-      base64Decode(base64String),
-      fit: BoxFit.fill,
-    );
-  }
-
-  static String base64String(Uint8List data) {
-    return base64Encode(data);
-  }
-
-  _imgFromCamera() async {
-    final picker = ImagePicker();
-    PickedFile pickedFile = await picker.getImage(source: ImageSource.gallery);
-    File image = File(pickedFile.path);
-
-    if (image == null) return;
-
-    String imgString = base64String(image.readAsBytesSync());
-
-    setState(() {
-      _imageEncoded = imgString;
-      _image = imageFromBase64String(imgString);
-    });
-  }
-
-  _imgFromGallery() async {
-    final picker = ImagePicker();
-    PickedFile pickedFile = await picker.getImage(source: ImageSource.camera);
-    File image = File(pickedFile.path);
-
-    if (image == null) return;
-
-    String imgString = base64String(image.readAsBytesSync());
-    setState(() {
-      _imageEncoded = imgString;
-      _image = imageFromBase64String(imgString);
-    });
-  }
-
-  _handleDatePicker() async {
-    final DateTime date = await showDatePicker(
-      context: this.context,
-      initialDate: _date,
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2100),
-    );
-    if (date != null && date != _date) {
-      setState(() {
-        _date = date;
-      });
-      _dateController.text = _dateFormatter.format(date);
-    }
-  }
-
-  _delete() {
-    if (widget.task.userDonated == this._userCreated) {
-      DatabaseHelper.instance.deleteTask(widget.task.id);
-      widget.updateTaskList();
-      Navigator.pop(this.context);
-    }
-  }
-
-  _submit() {
-    if (_formKey.currentState.validate()) {
-      _formKey.currentState.save();
-      print('$_title, $_date, $_priority');
-
-      Task task = Task(
-          title: _title,
-          date: _date,
-          priority: _priority,
-          imageEncoded: _imageEncoded,
-          author: _author,
-          userDonated: _userCreated,
-          emailDonated: _emailDonation);
-      if (widget.task == null) {
-        // Insert the task to our user's database
-        task.status = 0;
-        DatabaseHelper.instance.insertTast(task);
-      } else {
-        // Update the task
-        task.id = widget.task.id;
-        task.status = widget.task.status;
-        DatabaseHelper.instance.updateTask(task);
-      }
-      widget.updateTaskList();
-      Navigator.pop(this.context);
-    }
-  }
-
-  void _showPicker(context) {
-    showModalBottomSheet(
-        context: context,
-        builder: (BuildContext bc) {
-          return SafeArea(
-            child: Container(
-              child: new Wrap(
-                children: <Widget>[
-                  new ListTile(
-                      leading: new Icon(Icons.photo_library),
-                      title: new Text('Photo Library'),
-                      onTap: () {
-                        _imgFromGallery();
-                        Navigator.of(context).pop();
-                      }),
-                  new ListTile(
-                    leading: new Icon(Icons.photo_camera),
-                    title: new Text('Camera'),
-                    onTap: () {
-                      _imgFromCamera();
-                      Navigator.of(context).pop();
-                    },
-                  ),
-                ],
-              ),
-            ),
-          );
-        });
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: GestureDetector(
@@ -429,4 +302,132 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
       ),
     );
   }
+
+  @override
+  void dispose() {
+    _dateController.dispose();
+    super.dispose();
+  }
+
+  static Image imageFromBase64String(String base64String) {
+    return Image.memory(
+      base64Decode(base64String),
+      fit: BoxFit.fill,
+    );
+  }
+
+  static String base64String(Uint8List data) {
+    return base64Encode(data);
+  }
+
+  _imgFromCamera() async {
+    final picker = ImagePicker();
+    PickedFile pickedFile = await picker.getImage(source: ImageSource.gallery);
+    File image = File(pickedFile.path);
+
+    if (image == null) return;
+
+    String imgString = base64String(image.readAsBytesSync());
+
+    setState(() {
+      _imageEncoded = imgString;
+      _image = imageFromBase64String(imgString);
+    });
+  }
+
+  _imgFromGallery() async {
+    final picker = ImagePicker();
+    PickedFile pickedFile = await picker.getImage(source: ImageSource.camera);
+    File image = File(pickedFile.path);
+
+    if (image == null) return;
+
+    String imgString = base64String(image.readAsBytesSync());
+    setState(() {
+      _imageEncoded = imgString;
+      _image = imageFromBase64String(imgString);
+    });
+  }
+
+  _handleDatePicker() async {
+    final DateTime date = await showDatePicker(
+      context: this.context,
+      initialDate: _date,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    );
+    if (date != null && date != _date) {
+      setState(() {
+        _date = date;
+      });
+      _dateController.text = _dateFormatter.format(date);
+    }
+  }
+
+  _delete() {
+    if (widget.task.userDonated == this._userCreated) {
+      DatabaseHelper.instance.deleteTask(widget.task.id);
+      widget.updateTaskList();
+      Navigator.pop(this.context);
+    }
+  }
+
+  _submit() {
+    if (_formKey.currentState.validate()) {
+      _formKey.currentState.save();
+      print('$_title, $_date, $_priority');
+
+      Task task = Task(
+          title: _title,
+          date: _date,
+          priority: _priority,
+          imageEncoded: _imageEncoded,
+          author: _author,
+          userDonated: _userCreated,
+          emailDonated: _emailDonation);
+      if (widget.task == null) {
+        // Insert the task to our user's database
+        task.status = 0;
+        DatabaseHelper.instance.insertTast(task);
+      } else {
+        // Update the task
+        task.id = widget.task.id;
+        task.status = widget.task.status;
+        DatabaseHelper.instance.updateTask(task);
+      }
+      widget.updateTaskList();
+      Navigator.pop(this.context);
+    }
+  }
+
+  void _showPicker(context) {
+    showModalBottomSheet(
+        context: context,
+        builder: (BuildContext bc) {
+          return SafeArea(
+            child: Container(
+              child: new Wrap(
+                children: <Widget>[
+                  new ListTile(
+                      leading: new Icon(Icons.photo_library),
+                      title: new Text('Photo Library'),
+                      onTap: () {
+                        _imgFromGallery();
+                        Navigator.of(context).pop();
+                      }),
+                  new ListTile(
+                    leading: new Icon(Icons.photo_camera),
+                    title: new Text('Camera'),
+                    onTap: () {
+                      _imgFromCamera();
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ],
+              ),
+            ),
+          );
+        });
+  }
+
 }

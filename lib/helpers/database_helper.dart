@@ -75,6 +75,61 @@ class DatabaseHelper {
     return result;
   }
 
+  // Verifica se existe no banco. Se existir, atualiza pros dados mais recentes.
+  // Se não existir insere.
+  Future<int> updateTaskFromJson(Task task) async {
+    if (task.title == null && task.author == null) return 0;
+    Database db = await this.db;
+    bool found = false;
+    Task selectedInDb;
+
+    if (task.date == null) task.date = DateTime.now();
+
+    final List<Task> taskList = await getTaskList();
+    int result;
+    for (Task temp in taskList) {
+      if (temp.id == task.id) {
+        selectedInDb = temp;
+        found = true;
+        break;
+      }
+    }
+    //se encontrar gerenciar conflitos
+    if (found) {
+      //atualizar dados mais recentes. Necessário verificar se está vazio em um e preechido n outro
+      if (selectedInDb.userDonated.isEmpty && task.userDonated.isNotEmpty)
+        selectedInDb.userDonated = task.userDonated;
+
+      if (selectedInDb.imageEncoded.length < 10 &&
+          task.imageEncoded.length > 10)
+        selectedInDb.imageEncoded = task.imageEncoded;
+
+      if (selectedInDb.emailDonated.isEmpty && task.emailDonated.isNotEmpty)
+        selectedInDb.emailDonated = task.emailDonated;
+
+      if (selectedInDb.author.isEmpty && task.author.isNotEmpty)
+        selectedInDb.author = task.author;
+
+      if (selectedInDb.priority.isEmpty && task.priority.isNotEmpty)
+        selectedInDb.priority = task.priority;
+      if (selectedInDb.date.toString().isEmpty &&
+          task.date.toString().isNotEmpty) selectedInDb.date = task.date;
+
+      result = await db.update(
+        tasksTable,
+        selectedInDb.toMap(),
+        where: '$colId = ?',
+        whereArgs: [task.id],
+      );
+    }
+    //nao encontrado no db.
+    //Inserir
+    else {
+      result = await insertTast(task);
+    }
+    return result;
+  }
+
   Future<int> deleteTask(int id) async {
     Database db = await this.db;
     final int result = await db.delete(

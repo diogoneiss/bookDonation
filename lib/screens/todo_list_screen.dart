@@ -22,22 +22,38 @@ class _TodoListScreenState extends State<TodoListScreen> {
     _updateTaskList();
   }
 
-  Future<http.Response> fetchBooks() {
-    return http.get('https://jsonplaceholder.typicode.com/albums/1');
+  Future<List<Task>> _getRemoteTasks() async {
+    var response = await http.get(
+        "https://my-json-server.typicode.com/diogoneiss/fakeJsonServer/users");
+    var rb = response.body;
+
+    // store json data into list
+    var list = json.decode(rb) as List;
+
+    // iterate over the list and map each object in list to Img by calling Img.fromJson
+    List<Task> userList = list.map((i) => Task.fromMap(i)).toList();
+
+    return userList;
   }
 
-  _getFromRemote() async {
-    final response = await fetchBooks();
-    final Map<String, dynamic> data = json.decode(response.body);
+  _updateFromRemote() async {
+    List<Task> remoteList = await _getRemoteTasks();
+
+    for (Task current in remoteList) {
+      int status = await DatabaseHelper.instance.updateTaskFromJson(current);
+      print("Status do livro ${current.title}: ${status}");
+    }
   }
 
   _updateTaskList() {
     setState(() {
+      _updateFromRemote();
       _taskList = DatabaseHelper.instance.getTaskList();
     });
   }
 
   Widget _buildTask(Task task) {
+    if (task.date == null) task.date = DateTime.now();
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 25.0),
       child: Column(
@@ -67,16 +83,19 @@ class _TodoListScreenState extends State<TodoListScreen> {
                 DatabaseHelper.instance.updateTask(task);
                 _updateTaskList();
               },
-              activeColor: Theme.of(context).primaryColor,
+              activeColor: Theme
+                  .of(this.context)
+                  .primaryColor,
               value: task.status == 1 ? true : false,
             ),
             onTap: () => Navigator.push(
-              context,
+              this.context,
               MaterialPageRoute(
-                builder: (_) => AddTaskScreen(
-                  updateTaskList: _updateTaskList,
-                  task: task,
-                ),
+                builder: (_) =>
+                    AddTaskScreen(
+                      updateTaskList: _updateTaskList,
+                      task: task,
+                    ),
               ),
             ),
           ),

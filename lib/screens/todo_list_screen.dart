@@ -24,7 +24,7 @@ class _TodoListScreenState extends State<TodoListScreen> {
 
   Future<List<Task>> _getRemoteTasks() async {
     var response = await http.get(
-        "https://my-json-server.typicode.com/diogoneiss/fakeJsonServer/users");
+        "https://my-json-server.typicode.com/diogoneiss/fakeJsonServer/books");
     var rb = response.body;
 
     // store json data into list
@@ -32,16 +32,25 @@ class _TodoListScreenState extends State<TodoListScreen> {
 
     // iterate over the list and map each object in list to Img by calling Img.fromJson
     List<Task> userList = list.map((i) => Task.fromMap(i)).toList();
-
+    userList.map((e) => print(e.title + e.author));
     return userList;
   }
 
   _updateFromRemote() async {
-    List<Task> remoteList = await _getRemoteTasks();
+    List<Task> remoteList;
+    try {
+      remoteList = await _getRemoteTasks().timeout(const Duration(seconds: 10));
+    } on TimeoutException catch (e) {
+      print("Timeout in async call. $e");
+    } on Error catch (e) {
+      print("Error: $e");
+    }
+
+    if (remoteList.isEmpty) return;
 
     for (Task current in remoteList) {
       int status = await DatabaseHelper.instance.updateTaskFromJson(current);
-      print("Status do livro ${current.title}: ${status}");
+      print("Status do livro ${current.title}: $status");
     }
   }
 

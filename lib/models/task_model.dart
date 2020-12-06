@@ -57,15 +57,20 @@ class Task {
   }
 
   factory Task.fromMap(Map<String, dynamic> map) {
-    if (map['date'] == null)
+    if (map['date'] == null || map['date'] == "")
       map['date'] = DateTime.now().toIso8601String();
 
+    if (map['id'].runtimeType == String) map['id'] = int.parse(map['id']);
+
+    if (map['status'].runtimeType == String)
+      map['status'] = int.parse(map['status']);
+
     return Task.withId(
-        id: map['id'],
+        id: (map['id']),
         title: map['title'],
         date: DateTime.parse(map['date']),
         priority: map['priority'],
-        status: map['status'],
+        status: (map['status']),
         imageEncoded: map['image'],
         emailDonated: map['emailDonated'],
         userDonated: map['userDonated'],

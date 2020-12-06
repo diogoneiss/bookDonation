@@ -102,7 +102,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                         child: CircleAvatar(
                           radius: 55,
                           backgroundColor: Color(0xffFDCF09),
-                          child: _image != null
+                          child: _image != null && _imageEncoded.length > 10
                               ? ClipRRect(
                                   borderRadius: BorderRadius.circular(50),
                                   child: Image.memory(
